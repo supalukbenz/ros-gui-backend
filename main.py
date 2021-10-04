@@ -64,6 +64,7 @@ def connection():
 @cross_origin()
 def runningCommand():
     req = request.json
+    print(req, flush=True)
     command = req['command']
     screen_name = req['screen_name']
     username = req['username']
@@ -93,7 +94,10 @@ def runningCommand():
             msg = channel.recv(1024)
             print(msg, flush=True)
             if not msg:
-                ssh.close()
+                # ssh.close()
+                break
+            if not str(msg).strip():
+                print("str not msg", flush=True)
                 break
             if ros_output in str(msg):
                 break
@@ -181,7 +185,10 @@ def disconnect():
     password = req['password']
     ip = req['ip']
     port = req['port']
-    screen_command = 'killall screen'
+    screen_detached = "screen -ls | grep pts | cut -d. -f1 | awk '{print $1}' | xargs kill"
+    screen_command = "screen -ls | grep Detached | cut -d. -f1 | awk '{print $1}' | xargs kill"
+    screen_kill_command = "killall screen"
+    screen_output = "No Sockets found"
     try:
         ssh = paramiko.SSHClient()
         ssh.load_system_host_keys()
@@ -192,8 +199,20 @@ def disconnect():
         channel = ssh.get_transport().open_session()
         channel.get_pty()
         channel.invoke_shell()
+        channel.sendall('{}\n'.format(screen_detached))
         channel.sendall('{}\r'.format(screen_command))
-        ssh.close()
+        # while True:
+        #     msg = channel.recv(1024)
+        #     print(msg, flush=True)
+        #     if not msg:
+        #         print("not msg", flush=True)
+        #         ssh.close()
+        #         break
+        #     if screen_output in str(msg):
+        #         break
+        # stdin, stdout, stderr = ssh.exec_command(
+        #     screen_kill_command, get_pty=True)
+        # ssh.close()
         return 'Disconnect.'
     except paramiko.AuthenticationException as e:
         return "{}, please verify your credentials".format(e)
