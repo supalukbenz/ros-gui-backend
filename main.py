@@ -14,6 +14,31 @@ def connect_ssh(username, password, ip, port):
                 allow_agent=False, look_for_keys=False)
 
 
+def kill_screen(ssh):
+    screen_detached = "screen -ls | grep pts | cut -d. -f1 | awk '{print $1}' | xargs kill"
+    screen_command = "screen -ls | grep Detached | cut -d. -f1 | awk '{print $1}' | xargs kill"
+    screen_kill_command = "killall screen"
+    screen_output = "No Sockets found"
+    session_output = "no process found"
+    channel = ssh.get_transport().open_session()
+    channel.get_pty()
+    channel.invoke_shell()
+    # channel.sendall('{}\n'.format(screen_detached))
+    channel.sendall('{}\r'.format(screen_kill_command))
+    print("kill_screen", flush=True)
+    # while True:
+    #     msg = channel.recv(1024)
+    #     print(msg, flush=True)
+    #     if not msg:
+    #         print("not msg", flush=True)
+    #         ssh.close()
+    #         break
+    #     if screen_output in str(msg) or session_output in str(msg):
+    #         state = True
+    #         break
+    return screen_kill_command
+
+
 @app.route('/connect', methods=['POST'])
 @cross_origin()
 def connection():
@@ -28,27 +53,40 @@ def connection():
         ip, ip, port)
     ros_output = 'started at ws://0.0.0.0:{}'.format(
         port)
+    address_error_output = 'Address already in use.'
+    address_error = False
     try:
         ssh = paramiko.SSHClient()
         ssh.load_system_host_keys()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh.connect(ip, username=username, password=password,
                     allow_agent=False, look_for_keys=False)
+        kill_state = kill_screen(ssh)
+        print(kill_state, flush=True)
         channel = ssh.get_transport().open_session()
         channel.get_pty()
         channel.invoke_shell()
+        print('channel', flush=True)
         channel.sendall('{}\n'.format(screen_command))
         channel.sendall('{}\n'.format(ros_command))
 
         while True:
             msg = channel.recv(1024)
-            print(msg, flush=True)
+            print('msg{}'.format(msg), flush=True)
             if not msg:
                 ssh.close()
                 break
+            if address_error_output in str(msg):
+                address_error = True
+                break
             if ros_output in str(msg):
                 break
-        return 'Connect to {}'.format(ip), 200
+
+        if address_error:
+            return "{} already in use.\nPlease, change port number".format(port), 401
+        else:
+            return 'Connect to {}'.format(ip), 200
+
     except TimeoutError as ex:
         # times out on OS X, localhost
         return "TimeoutException: SSH connection fails.", 401
@@ -76,31 +114,31 @@ def runningCommand():
     screen_command = 'screen -S {}'.format(screen_name)
     ros_command = 'export ROS_HOSTNAME={} && export ROS_MASTER_URI=http://{}:11311 && {}'.format(
         ip, ip, command)
-    ros_output = 'Calibration End'
+    ros_output = 'start with pid'
     try:
         ssh = paramiko.SSHClient()
         ssh.load_system_host_keys()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh.connect(ip, username=username, password=password,
                     allow_agent=False, look_for_keys=False)
-        channel = ssh.get_transport().open_session()
+        transport = ssh.get_transport()
+        channel = transport.open_session()
         channel.get_pty()
         channel.invoke_shell()
         channel.sendall('{}\n'.format(screen_command))
         channel.sendall('{}\r'.format(ros_command))
 
-        # s = channel.recv(10000)
-        while True:
-            msg = channel.recv(1024)
-            print(msg, flush=True)
-            if not msg:
-                # ssh.close()
-                break
-            if not str(msg).strip():
-                print("str not msg", flush=True)
-                break
-            if ros_output in str(msg):
-                break
+        # while True:
+        #     # print('channel.closed {}'.format(
+        #     #     channel.closed), flush=True)
+        #     # print('transport {}'.format(transport.is_active()), flush=True)
+        #     msg = channel.recv(1024)
+        #     print('msg: {}'.format(msg), flush=True)
+        #     if not msg:
+        #         # ssh.close()
+        #         break
+        #     if ros_output in str(msg):
+        #         break
         return 'Running: {}'.format(command), 200
     except TimeoutError as ex:
         # times out on OS X, localhost
@@ -196,11 +234,11 @@ def disconnect():
         ssh.connect(ip, username=username, password=password,
                     allow_agent=False, look_for_keys=False)
 
-        channel = ssh.get_transport().open_session()
-        channel.get_pty()
-        channel.invoke_shell()
-        channel.sendall('{}\n'.format(screen_detached))
-        channel.sendall('{}\r'.format(screen_command))
+        # channel = ssh.get_transport().open_session()
+        # channel.get_pty()
+        # channel.invoke_shell()
+        # channel.sendall('{}\n'.format(screen_detached))
+        # channel.sendall('{}\r'.format(screen_command))
         # while True:
         #     msg = channel.recv(1024)
         #     print(msg, flush=True)
@@ -210,10 +248,11 @@ def disconnect():
         #         break
         #     if screen_output in str(msg):
         #         break
-        # stdin, stdout, stderr = ssh.exec_command(
-        #     screen_kill_command, get_pty=True)
-        # ssh.close()
-        return 'Disconnect.'
+        # # stdin, stdout, stderr = ssh.exec_command(
+        # #     screen_kill_command, get_pty=True)
+        # # ssh.close()
+        kill_state = kill_screen(ssh)
+        return 'Disconnect.', 200
     except paramiko.AuthenticationException as e:
         return "{}, please verify your credentials".format(e)
     except paramiko.SSHException as e:
