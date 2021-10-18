@@ -9,7 +9,7 @@
 Clone the repository and install dependencies:
     
 ```bash
-$ https://github.com/supalukbenz/ros-gui-backend.git
+$ git clone https://github.com/supalukbenz/ros-gui-backend.git
 $ cd ros-gui-backend
 ```
 Create a virtual environment and install the required packages
