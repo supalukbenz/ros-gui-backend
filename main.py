@@ -53,7 +53,7 @@ def connection():
         ip, ip, port)
     ros_output = 'started at ws://0.0.0.0:{}'.format(
         port)
-    address_error_output = 'Address already in use.'
+    address_error_output = 'already in use'
     address_error = False
     try:
         ssh = paramiko.SSHClient()
@@ -61,18 +61,18 @@ def connection():
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh.connect(ip, username=username, password=password,
                     allow_agent=False, look_for_keys=False)
-        kill_state = kill_screen(ssh)
-        print(kill_state, flush=True)
+        # kill_state = kill_screen(ssh)
+
         channel = ssh.get_transport().open_session()
         channel.get_pty()
         channel.invoke_shell()
-        print('channel', flush=True)
+        channel.sendall('{}\n'.format(kill_screen_command))
         channel.sendall('{}\n'.format(screen_command))
         channel.sendall('{}\n'.format(ros_command))
 
         while True:
             msg = channel.recv(1024)
-            print('msg{}'.format(msg), flush=True)
+            print('{}'.format(msg.decode("utf-8")), flush=True)
             if not msg:
                 ssh.close()
                 break
@@ -102,7 +102,7 @@ def connection():
 @cross_origin()
 def runningCommand():
     req = request.json
-    print(req, flush=True)
+
     command = req['command']
     screen_name = req['screen_name']
     username = req['username']

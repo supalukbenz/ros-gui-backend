@@ -23,6 +23,7 @@ click==7.1.2
 clickclick==1.2.2
 clikit==0.6.2
 cockroachdb==0.3.3
+colorclass==2.2.0
 colormath==3.0.0
 colorthief==0.2.1
 connexion==2.0.0
@@ -37,10 +38,11 @@ Django==2.1.2
 django-heroku==0.3.1
 dlib==19.21.1
 dnspython==1.16.0
+docopt==0.6.2
 entrypoints==0.3
 filelock==3.0.12
 flake8==3.6.0
-Flask==1.1.2
+Flask==2.0.2
 Flask-Cors==3.0.10
 Flask-Dance==1.2.0
 Flask-Login==0.4.1
@@ -71,10 +73,10 @@ ipykernel==5.1.4
 ipython==7.11.1
 ipython-genutils==0.2.0
 isort==4.3.4
-itsdangerous==1.1.0
+itsdangerous==2.0.1
 javascript==2015.32.59
 jedi==0.16.0
-Jinja2==2.11.2
+Jinja2==3.0.2
 joblib==0.14.1
 jsonschema==2.6.0
 jupyter-client==5.3.4
@@ -89,14 +91,14 @@ lazy==1.3
 lazy-object-proxy==1.3.1
 lockfile==0.12.2
 Mako==1.0.7
-MarkupSafe==1.1.1
+MarkupSafe==2.0.1
 matplotlib==3.3.4
 mccabe==0.6.1
 meinheld==0.6.1
 mistune==0.8.4
 more-itertools==4.3.0
 msgpack==1.0.2
-mysql-connector==2.1.7
+mysql-connector==2.1.6
 nbconvert==5.6.1
 nbformat==5.0.4
 networkx==2.5
@@ -115,6 +117,8 @@ pastel==0.2.1
 pexpect==4.8.0
 pickleshare==0.7.5
 Pillow==8.1.0
+pip-autoremove==0.10.0
+pip-upgrader==1.4.15
 pkginfo==1.7.0
 pluggy==0.8.0
 poetry==1.1.5
@@ -174,6 +178,7 @@ SQLAlchemy==1.2.12
 SQLAlchemy-Utils==0.33.9
 swagger-ui-bundle==0.0.2
 terminado==0.8.3
+terminaltables==3.1.0
 testpath==0.4.4
 threadpoolctl==2.0.0
 tifffile==2021.3.5
@@ -187,7 +192,7 @@ virtualenv==20.4.3
 virtualenv-clone==0.5.4
 wcwidth==0.1.8
 webencodings==0.5.1
-Werkzeug==1.0.1
+Werkzeug==2.0.2
 whitenoise==4.0
 wrapt==1.10.11
 WTForms==2.2.1
