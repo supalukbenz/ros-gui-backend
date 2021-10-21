@@ -3,6 +3,7 @@ import paramiko
 import time
 from flask_cors import CORS, cross_origin
 import sys
+import os
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}}, support_credentials=True)
@@ -262,4 +263,6 @@ def disconnect():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
