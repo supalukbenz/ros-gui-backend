@@ -40,6 +40,12 @@ def kill_screen(ssh):
     return screen_kill_command
 
 
+@app.route('/hello', methods=['GET'])
+@cross_origin()
+def hello():
+    return "hello"
+
+
 @app.route('/connect', methods=['POST'])
 @cross_origin()
 def connection():
