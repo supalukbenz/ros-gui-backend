@@ -5,7 +5,8 @@ from flask_cors import CORS, cross_origin
 import sys
 
 app = Flask(__name__)
-cors = CORS(app)
+cors = CORS(app, expose_headers=["x-suggested-filename"],
+            resources={r"/*": {"origins": "*"}}, support_credentials=True)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 
