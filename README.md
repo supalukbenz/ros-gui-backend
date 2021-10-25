@@ -2,22 +2,27 @@
 
 ## Requirements
 
- Python 3.7+ 
+Python 3.7+
 
 ## Project installation
 
 Clone the repository and install dependencies:
-    
+
 ```bash
 $ git clone https://github.com/supalukbenz/ros-gui-backend.git
 $ cd ros-gui-backend
 ```
+
 Create a virtual environment and install the required packages
+
 ```bash
 $ source install.sh
 ```
 
-Run project
+## Run the project
+
+Run Flask
+
 ```bash
 $ source start.sh
 ```
