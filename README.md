@@ -14,15 +14,12 @@ $ cd ros-gui-backend
 ```
 Create a virtual environment and install the required packages
 ```bash
-$ virtualenv venv
-$ source venv/bin/activate
-(venv) $ pip install -r requirements.txt
+$ source install.sh
 ```
 
-Run Flask
+Run project
 ```bash
-(venv) $ export FLASK_APP=main.py
-(venv) $ flask run
+$ source start.sh
 ```
 
 Backend server running on [http://localhost:5000/](http://localhost:5000/)
