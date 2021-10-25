@@ -24,9 +24,7 @@ def kill_screen(ssh):
     channel = ssh.get_transport().open_session()
     channel.get_pty()
     channel.invoke_shell()
-    # channel.sendall('{}\n'.format(screen_detached))
     channel.sendall('{}\r'.format(screen_kill_command))
-    print("kill_screen", flush=True)
     # while True:
     #     msg = channel.recv(1024)
     #     print(msg, flush=True)
@@ -134,18 +132,6 @@ def runningCommand():
         channel.invoke_shell()
         channel.sendall('{}\n'.format(screen_command))
         channel.sendall('{}\r'.format(ros_command))
-
-        # while True:
-        #     # print('channel.closed {}'.format(
-        #     #     channel.closed), flush=True)
-        #     # print('transport {}'.format(transport.is_active()), flush=True)
-        #     msg = channel.recv(1024)
-        #     print('msg: {}'.format(msg), flush=True)
-        #     if not msg:
-        #         # ssh.close()
-        #         break
-        #     if ros_output in str(msg):
-        #         break
         return 'Running: {}'.format(command), 200
     except TimeoutError as ex:
         # times out on OS X, localhost
@@ -156,70 +142,6 @@ def runningCommand():
         return "{}, invalid Username/Password for {}".format(e, ip), 401
     except paramiko.BadHostKeyException as e:
         return "Unable to verify server's host key: {}".format(e), 401
-
-
-@app.route('/avis-lowlv', methods=['GET'])
-@cross_origin()
-def avis_low_lv():
-    req = request.json
-    username = req['username']
-    password = req['password']
-    ip = req['ip']
-    ros_command = 'export ROS_HOSTNAME=localhost && export ROS_MASTER_URI=http://localhost:11311 && roslaunch avisbot_beta avisbot_lowlevel.launch'
-    ros_output = 'Waiting for IMU to be attached...'
-    try:
-        channel = ssh.get_transport().open_session()
-        channel.get_pty()
-        channel.invoke_shell()
-        channel.sendall('{}\r'.format(ros_command))
-        # s = channel.recv(10000)
-        while True:
-            msg = channel.recv(1024)
-            print(msg, flush=True)
-            if not msg:
-                ssh.close()
-                break
-            if ros_output in str(msg):
-                break
-        return ros_output, 200
-    except paramiko.AuthenticationException as e:
-        return "{}, please verify your credentials".format(e)
-    except paramiko.SSHException as e:
-        return "{}, invalid Username/Password for {}".format(e, ip)
-    except paramiko.BadHostKeyException as e:
-        return "Unable to verify server's host key: {}".format(e)
-
-
-@app.route('/avis-highlv', methods=['GET'])
-@cross_origin()
-def avis_high_lv():
-    req = request.json
-    username = req['username']
-    password = req['password']
-    ip = req['ip']
-    ros_command = 'export ROS_HOSTNAME=localhost && export ROS_MASTER_URI=http://localhost:11311 && roslaunch avisbot_beta avisbot_highlevel.launch'
-    ros_output = 'simROS just started!'
-    try:
-        channel = ssh.get_transport().open_session()
-        channel.get_pty()
-        channel.invoke_shell()
-        channel.sendall('{}\r'.format(ros_command))
-        # s = channel.recv(10000)
-        while True:
-            msg = channel.recv(1024)
-            print(msg, flush=True)
-            # if not msg:
-            #     ssh.close()
-            #     break
-            # if ros_output in str(msg):
-            #     break
-        return ros_output, 200
-    except paramiko.AuthenticationException as e:
-        return "{}, please verify your credentials".format(e)
-    except paramiko.SSHException as e:
-        return "{}, invalid Username/Password for {}".format(e, ip)
-    except paramiko.BadHostKeyException as e:
-        return "Unable to verify server's host key: {}".format(e)
 
 
 @app.route('/disconnect', methods=['POST'])
@@ -269,6 +191,6 @@ def disconnect():
 
 
 if __name__ == "__main__":
-    app.run(debug=False)
+    app.run(debug=True)
     # port = int(os.environ.get('PORT', 5000))
     # app.run(host='0.0.0.0', port=port)
