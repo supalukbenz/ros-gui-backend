@@ -3,3 +3,5 @@ Flask-Cors
 gunicorn
 paramiko
 urllib3
+bcrypt
+charset-normalizer

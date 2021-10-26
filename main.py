@@ -67,17 +67,15 @@ def connection():
         ssh.connect(ip, username=username, password=password,
                     allow_agent=False, look_for_keys=False)
         # kill_state = kill_screen(ssh)
-
         channel = ssh.get_transport().open_session()
         channel.get_pty()
         channel.invoke_shell()
         channel.sendall('{}\n'.format(kill_screen_command))
         channel.sendall('{}\n'.format(screen_command))
         channel.sendall('{}\n'.format(ros_command))
-
         while True:
             msg = channel.recv(1024)
-            print('{}'.format(msg.decode("utf-8")), flush=True)
+            print('{}'.format(msg), flush=True)
             if not msg:
                 ssh.close()
                 break
@@ -86,7 +84,6 @@ def connection():
                 break
             if ros_output in str(msg):
                 break
-
         if address_error:
             return "{} already in use.\nPlease, change port number".format(port), 401
         else:
