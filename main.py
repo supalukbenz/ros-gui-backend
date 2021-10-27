@@ -187,6 +187,36 @@ def disconnect():
         return "Unable to verify server's host key: {}".format(e)
 
 
+@app.route('/close_command', methods=['POST'])
+@cross_origin()
+def close_command():
+    req = request.json
+    username = req['username']
+    password = req['password']
+    ip = req['ip']
+    port = req['port']
+    screen_name = req['screen_name']
+    screen_kill_command = "screen -S {} -X quit".format(screen_name)
+    try:
+        ssh = paramiko.SSHClient()
+        ssh.load_system_host_keys()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(ip, username=username, password=password,
+                    allow_agent=False, look_for_keys=False)
+        transport = ssh.get_transport()
+        channel = transport.open_session()
+        channel.get_pty()
+        channel.invoke_shell()
+        channel.sendall('{}\n'.format(screen_kill_command))
+        return 'Closed {}'.format(screen_name), 200
+    except paramiko.AuthenticationException as e:
+        return "{}, please verify your credentials".format(e)
+    except paramiko.SSHException as e:
+        return "{}, invalid Username/Password for {}".format(e, ip)
+    except paramiko.BadHostKeyException as e:
+        return "Unable to verify server's host key: {}".format(e)
+
+
 if __name__ == "__main__":
     app.run(debug=True)
     # port = int(os.environ.get('PORT', 5000))
