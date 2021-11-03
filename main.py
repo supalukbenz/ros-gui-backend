@@ -77,7 +77,7 @@ def connection():
         channel.sendall('{}\n'.format(ros_command))
         while True:
             msg = channel.recv(1024)
-            print('{}'.format(msg), flush=True)
+            # print('{}'.format(msg), flush=True)
             if not msg:
                 ssh.close()
                 break
