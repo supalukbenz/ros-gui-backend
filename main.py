@@ -59,7 +59,9 @@ def connection():
     ros_output = 'started at ws://0.0.0.0:{}'.format(
         port)
     address_error_output = 'already in use'
+    rl_exception_output = 'is neither a launch file'
     address_error = False
+    rl_exception = False
     try:
         ssh = paramiko.SSHClient()
         ssh.load_system_host_keys()
@@ -82,10 +84,16 @@ def connection():
             if address_error_output in str(msg):
                 address_error = True
                 break
+            if rl_exception_output in str(msg):
+                rl_exception = True
+                break
             if ros_output in str(msg):
                 break
+
         if address_error:
             return "{} already in use.\nPlease, change port number".format(port), 401
+        elif rl_exception:
+            return "RLException: [rosbridge_websocket.launch] is neither a launch file in package [rosbridge_server] nor is [rosbridge_server] a launch file name", 401
         else:
             return 'Connect to {}'.format(ip), 200
 
