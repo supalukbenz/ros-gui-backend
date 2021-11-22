@@ -77,7 +77,6 @@ def connection():
         channel.sendall('{}\n'.format(ros_command))
         while True:
             msg = channel.recv(1024)
-            # print('{}'.format(msg), flush=True)
             if not msg:
                 ssh.close()
                 break
@@ -125,6 +124,43 @@ def runningCommand():
     ros_command = 'export ROS_HOSTNAME={} && export ROS_MASTER_URI=http://{}:11311 && {}'.format(
         ip, ip, command)
     ros_output = 'start with pid'
+    try:
+        ssh = paramiko.SSHClient()
+        ssh.load_system_host_keys()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(ip, username=username, password=password,
+                    allow_agent=False, look_for_keys=False)
+        transport = ssh.get_transport()
+        channel = transport.open_session()
+        channel.get_pty()
+        channel.invoke_shell()
+        channel.sendall('{}\n'.format(screen_command))
+        channel.sendall('{}\r'.format(ros_command))
+        return 'Running: {}'.format(command), 200
+    except TimeoutError as ex:
+        # times out on OS X, localhost
+        return "TimeoutException: SSH connection fails.", 401
+    except paramiko.AuthenticationException as e:
+        return "{}, please verify your credentials".format(e), 401
+    except paramiko.SSHException as e:
+        return "{}, invalid Username/Password for {}".format(e, ip), 401
+    except paramiko.BadHostKeyException as e:
+        return "Unable to verify server's host key: {}".format(e), 401
+
+
+@app.route('/web_video_server', methods=['POST'])
+@cross_origin()
+def runningWebVideoServer():
+    req = request.json
+    command = 'rosrun web_video_server web_video_server'
+    screen_name = 'web_video_server'
+    username = req['username']
+    password = req['password']
+    ip = req['ip']
+    port = req['port']
+    screen_command = 'screen -S {}'.format(screen_name)
+    ros_command = 'export ROS_HOSTNAME={} && export ROS_MASTER_URI=http://{}:11311 && {}'.format(
+        ip, ip, command)
     try:
         ssh = paramiko.SSHClient()
         ssh.load_system_host_keys()
